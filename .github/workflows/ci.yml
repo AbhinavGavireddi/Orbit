@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - name: Build service images
-        run: docker buildx bake --set '*.platform=linux/amd64' --load
+        run: docker buildx bake -f docker-bake.hcl --set '*.platform=linux/amd64' --load
 
   native:
     name: Native build and tests

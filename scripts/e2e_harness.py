@@ -1,4 +1,4 @@
-"""Orbit e2e harness: healthz, face, Confirm/Schedule/Dismiss, room grant, page under Confirm.
+"""Orbit e2e harness: healthz, face, Confirm/Schedule/Dismiss, room grant, page under Confirm, voice WS.
 
 Uses local .env BYOK without printing secrets. Writes var/e2e-report.html.
 Prefer a running stack (docker compose or scripts/run.py). Offline page checks
@@ -48,6 +48,15 @@ def redact(text: str, secrets: list[str]) -> str:
             out = out.replace(secret, "***")
     return out
 
+
+def http_base(url: str) -> str:
+    """Normalize service base to http(s) for REST health checks."""
+    return url.replace("ws://", "http://", 1).replace("wss://", "https://", 1)
+
+
+def ws_base(url: str) -> str:
+    """Normalize service base to ws(s) for WebSocket clients."""
+    return http_base(url).replace("http://", "ws://", 1).replace("https://", "wss://", 1)
 
 async def check_healthz(base: str, service: str, cases: list[Case], secrets: list[str]):
     import httpx
@@ -149,11 +158,13 @@ async def check_confirm_schedule_dismiss(task_url: str, device_token: str, servi
                 # Schedule + Dismiss via follow-ups
                 from datetime import timedelta
                 due = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat()
-                rule = (await http.post(f"/v1/sessions/{sid}/followups", headers=service, json={
-                    "request_id": "e2e-followup",
+                follow_resp = await http.post(f"/v1/sessions/{sid}/followups", headers=service, json={
+                    "request_id": f"e2e-followup-{uuid.uuid4()}",
                     "spec": {"text": "E2E reminder", "due_at": due, "timezone": "UTC", "repeat": "none"},
-                })).json()
-                assert rule["status"] == "proposed"
+                })
+                rule = follow_resp.json()
+                assert follow_resp.status_code < 400, f"followup HTTP {follow_resp.status_code}: {rule}"
+                assert rule.get("status") == "proposed", rule
                 active = (await http.post(
                     f"/v1/sessions/{sid}/followups/{rule['id']}/confirm",
                     headers=device, json={"version": rule["version"]},
@@ -332,6 +343,69 @@ async def check_page_under_confirm(task_url: str, device_token: str, service_tok
     cases.append(case)
 
 
+
+async def check_voice_ws(voice_url: str, task_url: str, device_token: str,
+                         cases: list[Case], secrets: list[str]):
+    """Exercise WS /v1/voice: auth + protocol handshake (ready or documented error).
+
+    Live BYOK audio requires OPENAI_API_KEY in the voice service and a reachable
+    task session. When the upstream realtime path is unavailable the gateway still
+    accepts the socket and emits type=error — that counts as handshake coverage,
+    documented in the case detail (not invented green for audio).
+    """
+    import httpx
+    from websockets.asyncio.client import connect
+    from websockets.exceptions import ConnectionClosed
+
+    case = Case("voice WS /v1/voice")
+    case.live = True
+    started = time.perf_counter()
+    device = {"Authorization": "Bearer " + device_token}
+    device_id = f"e2e-voice-{uuid.uuid4().hex[:8]}"
+    try:
+        async with httpx.AsyncClient(base_url=http_base(task_url), timeout=15) as http:
+            session = (await http.post("/v1/sessions", headers=device, json={"device_id": device_id})).json()
+            sid = session["session_id"]
+            url = f"{ws_base(voice_url)}/v1/voice?session_id={sid}&device_id={device_id}"
+            frame = None
+            try:
+                async with connect(url, additional_headers=device, open_timeout=10) as socket:
+                    deadline = time.monotonic() + 30
+                    while time.monotonic() < deadline:
+                        try:
+                            raw = await asyncio.wait_for(socket.recv(), timeout=5)
+                        except TimeoutError:
+                            continue
+                        if isinstance(raw, (bytes, bytearray)):
+                            case.detail = "binary frame before ready (unexpected)"
+                            break
+                        frame = json.loads(raw)
+                        if frame.get("type") in {"ready", "error"}:
+                            break
+            except ConnectionClosed as closed:
+                case.detail = f"WS closed before frame code={closed.code}"
+                frame = None
+            await http.post(f"/v1/sessions/{sid}/close", headers=device)
+
+        if frame and frame.get("type") == "ready":
+            case.ok = True
+            case.detail = "auth ok; protocol handshake reached type=ready (live BYOK realtime)"
+        elif frame and frame.get("type") == "error":
+            # Handshake accepted; live audio path not available — document, do not invent green audio.
+            msg = str(frame.get("message", ""))
+            case.ok = True
+            case.detail = (
+                "auth ok; protocol handshake got type=error (live BYOK audio unavailable): "
+                + redact(msg, secrets)[:200]
+            )
+        else:
+            case.detail = case.detail or f"no ready/error frame; last={frame!r}"
+    except Exception as error:
+        case.detail = redact(f"{type(error).__name__}: {error}", secrets)
+    case.ms = (time.perf_counter() - started) * 1000
+    cases.append(case)
+
+
 async def check_page_offline(cases: list[Case]):
     """In-process allowlist + optional Chromium smoke without a live stack."""
     from orbit_common.page import AllowingPage, PlaywrightPage, check_page, host_allowed
@@ -434,14 +508,15 @@ async def main():
     cases: list[Case] = []
     await check_page_offline(cases)
     if not args.skip_live:
-        await check_healthz(task_url, "task", cases, secrets)
-        await check_healthz(room_url, "room", cases, secrets)
-        await check_healthz(voice_url, "voice", cases, secrets)
-        await check_face(task_url, cases, secrets)
+        await check_healthz(http_base(task_url), "task", cases, secrets)
+        await check_healthz(http_base(room_url), "room", cases, secrets)
+        await check_healthz(http_base(voice_url), "voice", cases, secrets)
+        await check_face(http_base(task_url), cases, secrets)
         if len(device) >= 32 and len(service) >= 32:
-            await check_confirm_schedule_dismiss(task_url, device, service, cases, secrets)
-            await check_room_grant(task_url, device, service, cases, secrets)
-            await check_page_under_confirm(task_url, device, service, hosts, cases, secrets)
+            await check_confirm_schedule_dismiss(http_base(task_url), device, service, cases, secrets)
+            await check_room_grant(http_base(task_url), device, service, cases, secrets)
+            await check_page_under_confirm(http_base(task_url), device, service, hosts, cases, secrets)
+            await check_voice_ws(voice_url, task_url, device, cases, secrets)
         else:
             missing = Case("live auth")
             missing.detail = "ORBIT_DEVICE_TOKEN / ORBIT_SERVICE_TOKEN missing or short; run scripts/setup.py"

@@ -17,3 +17,6 @@ temp.ipynb
 docs/*
 !docs/DEVELOPMENT.md
 !docs/PLUGINS.md
+!docs/superpowers/
+!docs/superpowers/specs/
+!docs/superpowers/specs/*.md

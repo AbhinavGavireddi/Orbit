@@ -31,7 +31,7 @@ def create_app(settings=None, redis=None):
     room_http = httpx.AsyncClient()
     room = HttpRoom(config.orbit_room_url, config.orbit_service_token, room_http)
     page = AllowingPage(PlaywrightPage(), config.orbit_browser_hosts.split(","))
-    door = McpDoor({})
+    door = McpDoor.from_plugins(config.orbit_plugins_config)
     store = Store(db, config.orbit_artifact_dir, effects=Effects({
         "room_read": room, "room_call": room,
         "browser_read": page, "browser_act": page,

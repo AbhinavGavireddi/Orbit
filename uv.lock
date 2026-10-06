@@ -563,6 +563,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pypdf" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
     { name = "redis" },
     { name = "reportlab" },
     { name = "uvicorn" },
@@ -574,7 +575,6 @@ dev = [
     { name = "fakeredis", extra = ["lua"] },
     { name = "pytest" },
     { name = "pytest-asyncio" },
-    { name = "pyyaml" },
     { name = "ruff" },
 ]
 
@@ -587,6 +587,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = "==2.15.0" },
     { name = "pypdf", specifier = "==6.19.0" },
     { name = "python-dotenv", specifier = "==1.1.1" },
+    { name = "pyyaml", specifier = "==6.0.2" },
     { name = "redis", specifier = "==8.1.0" },
     { name = "reportlab", specifier = "==5.0.1" },
     { name = "uvicorn", specifier = "==0.53.0" },
@@ -598,7 +599,6 @@ dev = [
     { name = "fakeredis", extras = ["lua"], specifier = "==2.38.0" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-asyncio", specifier = "==1.4.0" },
-    { name = "pyyaml", specifier = "==6.0.2" },
     { name = "ruff", specifier = "==0.16.8" },
 ]
 

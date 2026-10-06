@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     orbit_jev_capabilities: str = ""
     orbit_vad_eagerness: Literal["medium", "high"] = "medium"
     orbit_max_task_steps: int = 30
-    orbit_skill_roots: str = ""
+    orbit_skill_roots: str = "./skills,home"
+    orbit_plugins_config: str = "config/orbit.plugins.yaml"
     orbit_learned_skills_dir: str = ""
 
     def require_auth(self):

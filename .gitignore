@@ -16,3 +16,4 @@ temp.ipynb
 # Local drafts under docs/; DEVELOPMENT.md is the publishable guide.
 docs/*
 !docs/DEVELOPMENT.md
+!docs/PLUGINS.md

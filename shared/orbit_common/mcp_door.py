@@ -127,7 +127,9 @@ class UrlMcpServer:
 
     async def __call__(self, tool: str, arguments: dict) -> dict:
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
-        token = self.env.get("Authorization") or self.env.get("ORBIT_MCP_TOKEN")
+        # Config env overrides process env (same merge idea as StdioMcpServer).
+        merged = {**os.environ, **self.env}
+        token = merged.get("Authorization") or merged.get("ORBIT_MCP_TOKEN")
         if token:
             headers["Authorization"] = token if token.lower().startswith("bearer ") else f"Bearer {token}"
         payload = {

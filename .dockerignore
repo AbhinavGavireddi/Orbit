@@ -6,6 +6,10 @@
 !shared/**
 !services/
 !services/**
+!config/
+!config/**
+!skills/
+!skills/**
 !scripts/
 !scripts/serve.py
 **/__pycache__

@@ -1,13 +1,11 @@
 # Example Orbit plugins. Copy to config/orbit.plugins.yaml (or set ORBIT_PLUGINS_CONFIG).
 # Architecture: no auto-approve, no host shell, no MCP without an entry here.
 # mcp_read is an observation. mcp_call waits for Confirm.
-
-skill_roots:
-  - ./skills
-  - home
+# Skill roots are ORBIT_SKILL_ROOTS only (default ./skills,home), not this file.
 
 mcp_servers:
   # Stdio: argv list only (command as list, or program name + args). Never a shell string.
+  # Path-aware refuse: /bin/bash and `env bash` are rejected the same as bare bash.
   # notes:
   #   command: ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/tmp/orbit-notes"]
   #   env:
@@ -19,8 +17,8 @@ mcp_servers:
   #   args: ["-y", "mcp-server-calendar"]
   #   env: {}
 
-  # Remote JSON-RPC over HTTP (https, or http://127.0.0.1 / localhost only):
+  # Remote JSON-RPC over HTTP (https, or http://127.0.0.1 / localhost only).
+  # Auth: set ORBIT_MCP_TOKEN (or Authorization) in process .env / compose; YAML env overrides.
   # search:
   #   url: https://mcp.example.com/rpc
-  #   env:
-  #     ORBIT_MCP_TOKEN: "set-in-.env-and-reference-via-compose"
+  #   env: {}

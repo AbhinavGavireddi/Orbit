@@ -1,4 +1,4 @@
-"""Orbit plugins config: MCP servers and skill roots. Fail closed. No shell string."""
+"""Orbit plugins config: MCP servers. Fail closed. No shell string. Skill roots use ORBIT_SKILL_ROOTS."""
 
 from __future__ import annotations
 
@@ -23,7 +23,6 @@ class McpServerConfig:
 @dataclass(frozen=True)
 class PluginsConfig:
     mcp_servers: dict[str, McpServerConfig] = field(default_factory=dict)
-    skill_roots: tuple[str, ...] = ("./skills",)
 
 
 def default_plugins_path() -> Path:
@@ -50,25 +49,11 @@ def parse_plugins(data) -> PluginsConfig:
         return PluginsConfig()
     if not isinstance(data, dict):
         raise ValueError("plugins config must be a mapping")
-    unknown = set(data) - {"mcp_servers", "skill_roots"}
+    unknown = set(data) - {"mcp_servers"}
     if unknown:
         raise ValueError("plugins config has an unknown field")
-    roots = _skill_roots(data.get("skill_roots", ["./skills"]))
     servers = _mcp_servers(data.get("mcp_servers", {}))
-    return PluginsConfig(mcp_servers=servers, skill_roots=roots)
-
-
-def _skill_roots(raw) -> tuple[str, ...]:
-    if raw is None:
-        return ("./skills",)
-    if not isinstance(raw, list) or not raw:
-        raise ValueError("skill_roots must be a non-empty list")
-    roots = []
-    for item in raw:
-        if not isinstance(item, str) or not item.strip():
-            raise ValueError("skill_roots entries must be non-empty strings")
-        roots.append(item.strip())
-    return tuple(roots)
+    return PluginsConfig(mcp_servers=servers)
 
 
 def _mcp_servers(raw) -> dict[str, McpServerConfig]:
@@ -102,6 +87,29 @@ def _mcp_servers(raw) -> dict[str, McpServerConfig]:
     return servers
 
 
+_SHELLS = frozenset({"sh", "bash", "zsh", "fish", "cmd.exe", "powershell"})
+
+
+def _basename(part: str) -> str:
+    return Path(part).name.lower()
+
+
+def _refuse_shell(argv: list[str]) -> None:
+    """Refuse shells by basename, including /bin/bash and env … bash."""
+    if _basename(argv[0]) in _SHELLS:
+        raise ValueError("MCP command must not be a shell")
+    if _basename(argv[0]) != "env":
+        return
+    for part in argv[1:]:
+        if part.startswith("-"):
+            continue
+        if "=" in part:
+            continue
+        if _basename(part) in _SHELLS:
+            raise ValueError("MCP command must not be a shell")
+        return
+
+
 def _command(body: dict) -> tuple[str, ...] | None:
     if "command" not in body and "args" not in body:
         return None
@@ -123,8 +131,7 @@ def _command(body: dict) -> tuple[str, ...] | None:
         raise ValueError("MCP command must be an argv list or a program name")
     if not argv or not all(isinstance(part, str) and part for part in argv):
         raise ValueError("MCP command must be a non-empty argv list")
-    if any(part in {"sh", "bash", "zsh", "fish", "cmd.exe", "powershell"} for part in argv[:1]):
-        raise ValueError("MCP command must not be a shell")
+    _refuse_shell(argv)
     return tuple(argv)
 
 

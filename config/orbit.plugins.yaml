@@ -1,9 +1,5 @@
 # Local plugins. Copy from orbit.plugins.example.yaml and edit.
 # MCP servers are off until you add them here. Unknown names fail closed.
-# Skill roots feed ORBIT_SKILL_ROOTS when you wire them; default stack is ./skills,home.
-
-skill_roots:
-  - ./skills
-  - home
+# Skill roots are ORBIT_SKILL_ROOTS only (default ./skills,home). See docs/PLUGINS.md.
 
 mcp_servers: {}

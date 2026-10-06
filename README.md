@@ -90,14 +90,14 @@ Orbit does not track their release notes by rewriting their product. A new featu
 | Door | What may enter | What must still be true |
 |---|---|---|
 | Skill file | A procedure another project already wrote. Disk skills exist today | The file does not run a shell. A world change still becomes an action id |
-| MCP server | A connector they ship next: mail, calendar, files, search. The door is in the tree. No server is configured | The server proposes. Task grants. A write needs Confirm. A read is an observation with an action id |
+| MCP server | A connector they ship next: mail, calendar, files, search. List it in `config/orbit.plugins.yaml` | The server proposes. Task grants. A write needs Confirm. A read is an observation with an action id |
 | Worker library | A thinner hand for a world we already named. Playwright is the only one accepted | It is not on the fast path. It does not own the grant |
 
 Refuse these even if they are the headline of a release: a host shell, auto-approve, chat-channel presence, a second voice runtime, a checkpoint that replays a click, and a memory store that replaces Redis on the talk path.
 
 What is already covered, so a new release does not force a rewrite: one audible reply, epoch, Confirm, Schedule, quiet hours, bounded memory tools, cited research, advisory score, and room HTTP.
 
-What is still open, on purpose: install Chromium, configure an MCP server, semantic memory, and a wake while the face is asleep. The last one stays closed until the face can show a card. A Telegram bot would be a second presence.
+What is still open, on purpose: semantic memory, and a wake while the face is asleep. The last one stays closed until the face can show a card. A Telegram bot would be a second presence.
 
 ### Browser
 
@@ -131,7 +131,7 @@ A page read is an observation. It still has an action id, so a retry cannot doub
 | Room | Its own process, port 8105 | Lamp, fan, printer, and a climate reading. A stand-in capability | Task calls it after Confirm |
 | Browser | Grant path is in the tree. Chromium is not installed | Open a page, read it, click or type after Confirm | Empty profile. Domain allowlist. The call runs in the task process. Not the face tab |
 | Skill files | Disk, already in the worker | A named procedure for one goal | The file does not grant and does not get a shell |
-| MCP door | In the tree. No server is configured | Import a connector from another harness | The server proposes. Task is the only caller of the world |
+| MCP door | Configured via [docs/PLUGINS.md](docs/PLUGINS.md); empty by default | Import a connector from another harness | The server proposes. Task is the only caller of the world |
 | Desktop | Previous Mac client, still in the tree | Screenshots and Accessibility on that client | This face answers "This client has no desktop." The record still exists |
 
 ### Open source in this tree

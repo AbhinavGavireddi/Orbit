@@ -25,6 +25,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     && chown -R orbit:orbit /data /app
 COPY shared /app/shared
 COPY services/${SERVICE} /app/service
+COPY config /app/config
+COPY skills /app/skills
 COPY scripts/serve.py /app/serve.py
 ENV PYTHONPATH=/app/shared:/app/service \
     PATH=/app/.venv/bin:$PATH

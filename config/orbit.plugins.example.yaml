@@ -1,0 +1,26 @@
+# Example Orbit plugins. Copy to config/orbit.plugins.yaml (or set ORBIT_PLUGINS_CONFIG).
+# Architecture: no auto-approve, no host shell, no MCP without an entry here.
+# mcp_read is an observation. mcp_call waits for Confirm.
+
+skill_roots:
+  - ./skills
+  - home
+
+mcp_servers:
+  # Stdio: argv list only (command as list, or program name + args). Never a shell string.
+  # notes:
+  #   command: ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/tmp/orbit-notes"]
+  #   env:
+  #     EXAMPLE_KEY: "set-in-env-not-here-if-secret"
+
+  # Equivalent Cursor-style shape (program + args list):
+  # calendar:
+  #   command: npx
+  #   args: ["-y", "mcp-server-calendar"]
+  #   env: {}
+
+  # Remote JSON-RPC over HTTP (https, or http://127.0.0.1 / localhost only):
+  # search:
+  #   url: https://mcp.example.com/rpc
+  #   env:
+  #     ORBIT_MCP_TOKEN: "set-in-.env-and-reference-via-compose"

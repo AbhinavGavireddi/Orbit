@@ -48,6 +48,7 @@ services:
       ORBIT_DECISION_URL: http://decision:8104
       ORBIT_ROOM_URL: http://room:8105
       ORBIT_BROWSER_HOSTS: ${ORBIT_BROWSER_HOSTS:-}
+      ORBIT_PLUGINS_CONFIG: ${ORBIT_PLUGINS_CONFIG:-config/orbit.plugins.yaml}
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     ports: [127.0.0.1:8100:8100]
     volumes: [artifacts:/data/artifacts]
@@ -80,7 +81,7 @@ services:
       ORBIT_JEV_CAPABILITIES: ${ORBIT_JEV_CAPABILITIES:-}
       ORBIT_VAD_EAGERNESS: ${ORBIT_VAD_EAGERNESS:-medium}
       ORBIT_DECISION_URL: http://decision:8104
-      ORBIT_SKILL_ROOTS: ${ORBIT_SKILL_ROOTS:-}
+      ORBIT_SKILL_ROOTS: ${ORBIT_SKILL_ROOTS:-./skills,home}
     ports: [127.0.0.1:8101:8101]
     depends_on:
       task: {condition: service_healthy}
@@ -95,7 +96,7 @@ services:
       ORBIT_AGENT_MODEL: ${ORBIT_AGENT_MODEL:-gpt-5.6-sol}
       ORBIT_MAX_TASK_STEPS: ${ORBIT_MAX_TASK_STEPS:-30}
       ORBIT_DECISION_URL: http://decision:8104
-      ORBIT_SKILL_ROOTS: ${ORBIT_SKILL_ROOTS:-}
+      ORBIT_SKILL_ROOTS: ${ORBIT_SKILL_ROOTS:-./skills,home}
       ORBIT_LEARNED_SKILLS_DIR: ${ORBIT_LEARNED_SKILLS_DIR:-}
     depends_on:
       task: {condition: service_healthy}

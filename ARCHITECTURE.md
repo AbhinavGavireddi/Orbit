@@ -24,7 +24,7 @@ Playwright loads on the first page call in the task process. The task image inst
 
 ## MCP
 
-`mcp_read` and `mcp_call` are the import door. A server is injected. None is configured. The door does not start a process and does not grow a shell. A write needs Confirm.
+`mcp_read` and `mcp_call` are the import door. Servers come from `config/orbit.plugins.yaml` (or `ORBIT_PLUGINS_CONFIG`). An unknown name fails closed. Stdio servers spawn from an argv list only; never a shell string. A write needs Confirm. See [docs/PLUGINS.md](docs/PLUGINS.md).
 
 ## Refuse
 

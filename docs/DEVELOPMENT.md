@@ -27,6 +27,13 @@ Optional page allowlist (task grant only; empty refuses every page):
 ORBIT_BROWSER_HOSTS=example.com
 ```
 
+Plugins (MCP + skills): see [PLUGINS.md](PLUGINS.md). Defaults:
+
+```sh
+ORBIT_SKILL_ROOTS=./skills,home
+ORBIT_PLUGINS_CONFIG=config/orbit.plugins.yaml
+```
+
 ## Run Services
 
 ```sh

@@ -31,9 +31,16 @@ def roots_from_setting(value):
     raw = (value or "").strip()
     if not raw:
         return []
-    if raw == "home":
-        return home_skill_roots()
-    return [Path(part.strip()) for part in raw.split(",") if part.strip()]
+    roots = []
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if part == "home":
+            roots.extend(home_skill_roots())
+        else:
+            roots.append(Path(part))
+    return roots
 
 
 def _frontmatter(text):

@@ -897,7 +897,7 @@ async def ticket_ok(redis, ticket, device_id, session_id):
 def create_app(settings=None, redis=None):
     config = settings or Settings()
     if not config.orbit_skill_roots:
-        config = config.model_copy(update={"orbit_skill_roots": "home"})
+        config = config.model_copy(update={"orbit_skill_roots": "./skills,home"})
 
     @asynccontextmanager
     async def lifespan(app):

@@ -1,1 +1,1 @@
-langgraph==1.2.2
+# Legacy. langgraph is in pyproject.toml + uv.lock (uv sync).

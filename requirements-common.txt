@@ -1,3 +1,5 @@
+# Legacy mirror. Install with: uv sync
+# Pins live in pyproject.toml + uv.lock.
 fastapi==0.141.1
 uvicorn==0.53.0
 httpx==0.28.1

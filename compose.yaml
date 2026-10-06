@@ -47,8 +47,13 @@ services:
       ORBIT_PORT: "8100"
       ORBIT_DECISION_URL: http://decision:8104
       ORBIT_ROOM_URL: http://room:8105
+      ORBIT_BROWSER_HOSTS: ${ORBIT_BROWSER_HOSTS:-}
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     ports: [127.0.0.1:8100:8100]
     volumes: [artifacts:/data/artifacts]
+    tmpfs: [/tmp:size=256m]
+    shm_size: 256mb
+    mem_limit: 1024m
     depends_on:
       redis: {condition: service_healthy}
       room: {condition: service_healthy}

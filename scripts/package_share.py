@@ -95,12 +95,18 @@ def site_packages(python):
     if site.exists():
         shutil.rmtree(site)
     site.mkdir()
-    subprocess.run([str(python), "-m", "pip", "install", "--upgrade", "pip"], check=True)
-    subprocess.run([str(python), "-m", "pip", "install", "--target", str(site),
-                    "-c", str(ROOT / "constraints.txt"),
-                    "-r", str(ROOT / "requirements-common.txt"),
-                    "-r", str(ROOT / "services/automation/requirements.txt"),
-                    "-r", str(ROOT / "services/research/requirements.txt")], check=True)
+    # Prefer locked deps via uv when available; fall back to pip for offline share builds.
+    uv = shutil.which("uv")
+    if uv:
+        subprocess.run([uv, "export", "--frozen", "--no-dev", "--no-emit-project", "-o", str(CACHE / "requirements.share.txt")],
+                       cwd=ROOT, check=True)
+        subprocess.run([str(python), "-m", "pip", "install", "--upgrade", "pip"], check=True)
+        subprocess.run([str(python), "-m", "pip", "install", "--target", str(site),
+                        "-r", str(CACHE / "requirements.share.txt")], check=True)
+    else:
+        subprocess.run([str(python), "-m", "pip", "install", "--upgrade", "pip"], check=True)
+        subprocess.run([str(python), "-m", "pip", "install", "--target", str(site),
+                        "-r", str(ROOT / "requirements-dev.txt")], check=True)
     return site
 
 

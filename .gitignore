@@ -13,4 +13,6 @@ dist/
 .DS_Store
 *.log
 temp.ipynb
-docs/
+# Local drafts under docs/; DEVELOPMENT.md is the publishable guide.
+docs/*
+!docs/DEVELOPMENT.md

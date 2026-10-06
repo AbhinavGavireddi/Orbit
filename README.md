@@ -68,7 +68,7 @@ A solid line is a call the host makes today. A dotted line is in the tree and is
 |---|---|---|
 | Fast, internal | Face, `WS /v1/voice`, Redis, Confirm, Schedule, epoch, ping | None. FastAPI, redis-py, websockets, Pydantic |
 | Slow, already here | Realtime, Responses, Jev, research PDF, LangGraph | None |
-| Slow, after Confirm | Empty Chromium | One: Playwright, on the task process. Not installed |
+| Slow, after Confirm | Empty Chromium | One: Playwright, on the task process |
 
 ### Plumbing
 
@@ -79,7 +79,7 @@ A solid line is a call the host makes today. A dotted line is in the tree and is
 | Request shapes | Pydantic | Yes |
 | Observe, act, verify | LangGraph | No |
 | Research files | pypdf, ReportLab | No |
-| Page snapshot and click | [microsoft/playwright-python](https://github.com/microsoft/playwright-python) | No. Not installed yet |
+| Page snapshot and click | [microsoft/playwright-python](https://github.com/microsoft/playwright-python) | Yes. Task image only; grant stays on Confirm |
 
 Do not add Pipecat, Letta, Browser Use, Stagehand, Hermes, OpenClaw, or DeepSeek Harness. Each one is a second runtime or a second owner of the grant. Hermes can embed as `AIAgent`. We do not, because its default tool is a host shell.
 
@@ -138,7 +138,7 @@ A page read is an observation. It still has an action id, so a retry cannot doub
 
 These are the repositories the services import or run today. OpenAI Realtime, OpenAI Responses, and Jev are hosted models. They are not in this list. The Mac app has no third-party Swift packages. `scripts/jev_laya_examples.py` asks the same decision questions to local Laya. That sample loads [convaiinnovations/laya](https://huggingface.co/convaiinnovations/laya) from Hugging Face. The services do not import it.
 
-The target adds one worker library, not yet in the image: [microsoft/playwright-python](https://github.com/microsoft/playwright-python). Pipecat, Letta, and Browser Use stay out.
+The target adds one worker library on the task process: [microsoft/playwright-python](https://github.com/microsoft/playwright-python). Pipecat, Letta, and Browser Use stay out.
 
 | Repository | Used for | Harness piece |
 |---|---|---|
@@ -198,7 +198,7 @@ Follow-ups prompt the user. They do not create room jobs by themselves. Stop or 
 
 - [Voice coordination](services/voice/orbit_voice/app.py), [tools](services/voice/orbit_voice/protocol.py), [engagement policy](services/voice/orbit_voice/events.py)
 - [Goal graph](services/automation/orbit_automation/goal.py), [room goals](services/automation/orbit_automation/room.py), [page read](services/automation/orbit_automation/browser.py), [task contracts](shared/orbit_common/contracts.py), [authority](services/task/orbit_task/store.py)
-- [Host effects](shared/orbit_common/effects.py), [page](shared/orbit_common/page.py), [MCP door](shared/orbit_common/mcp_door.py). Chromium is not installed. No Pipecat, Letta, or Hermes on the talk path
+- [Host effects](shared/orbit_common/effects.py), [page](shared/orbit_common/page.py), [MCP door](shared/orbit_common/mcp_door.py). Chromium installs with the task image. No Pipecat, Letta, or Hermes on the talk path
 - [Browser face](services/task/orbit_task/face.html), [room service](services/room/orbit_room/app.py), [device names](shared/orbit_common/room_devices.py)
 - [Risk assessment](services/task/orbit_task/actions.py), [action policy](services/task/orbit_task/policy.py), [scheduler](services/task/orbit_task/followups.py)
 - [Native presentation](native/Sources/OrbitApp/OrbitModel.swift) is the previous Mac client and is outside this cut. [Release workflow](scripts/release_mac.py). [Validation budget](scripts/validation_budget.py).
@@ -292,19 +292,19 @@ docker compose up -d --build
 The previous Mac client, unused by this cut:
 
 ```sh
-uv venv --python 3.13
-uv pip install --python .venv/bin/python -r requirements-dev.txt
-python3 scripts/build_mac.py
-.venv/bin/python scripts/launch.py --preview
+uv sync --group dev
+uv run playwright install chromium
+uv run python scripts/build_mac.py
+uv run python scripts/launch.py --preview
 ```
 
 ## Development Checks
 
 ```sh
-uv venv --python 3.13
-uv pip install --python .venv/bin/python -r requirements-dev.txt
-.venv/bin/python -m pytest -q
-.venv/bin/ruff check shared services tests scripts
+uv sync --group dev
+uv run playwright install chromium
+uv run pytest -q
+uv run ruff check shared services tests scripts
 bash native/check.sh
 ```
 
@@ -312,7 +312,7 @@ Broker smoke with fake device, no provider calls and no real desktop actions:
 
 ```sh
 docker compose stop automation research
-.venv/bin/python scripts/smoke.py
+uv run python scripts/smoke.py
 docker compose up -d automation research
 ```
 
@@ -320,7 +320,7 @@ Two-worker handoff smoke:
 
 ```sh
 docker compose up -d --scale automation=2 --scale research=1
-.venv/bin/python scripts/smoke.py --workers
+uv run python scripts/smoke.py --workers
 docker compose up -d --scale automation=1
 ```
 
@@ -348,7 +348,7 @@ docker compose up -d --scale automation=1
 | Developer ID release | Tooling implemented; blocked on account setup | Developer ID identity and notarytool profile required; no notarized release claimed |
 | Cua Driver evaluation | Pending | Existing native driver retained; no paired 20-goal trial or adoption claim |
 | Browser face as the Orbit session | Implemented; offline verified | The face uses the voice gateway and the task socket. Talk, Confirm, Schedule, and Dismiss are different controls. The voice model owns the sentence. Research files, follow-ups, and confirmations return on that session. A desktop action on this face ends in the record. The round board is still not built |
-| Playwright on the task process, grant stays fast | Grant path is in the tree; library not installed | Empty Chromium after Confirm. Redis memory and the current voice socket stay. No Pipecat, Letta, or Hermes |
+| Playwright on the task process, grant stays fast | Library + Chromium on the task image; grant stays on Confirm | Empty Chromium after Confirm. Redis memory and the current voice socket stay. No Pipecat, Letta, or Hermes |
 | Customer acceptance | Pending, previous cohort | 60 held-out goals and 30 audio fixtures still apply; the three-Mac session plan belonged to the previous client |
 
 ### Measured results and targets

@@ -1,1 +1,1 @@
-# HTTP provider adapter uses the shared httpx dependency.
+# Legacy. Runtime pins are in pyproject.toml + uv.lock (uv sync).

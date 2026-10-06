@@ -279,7 +279,7 @@ Production server smoke against TLS endpoints requires `.env` or local environme
 Before a public binary release:
 
 1. Run `python3 scripts/check_release.py`.
-2. Run `uv run pytest`.
+2. Run `uv sync --group dev` then `uv run pytest`.
 3. Run `uv run ruff check shared services tests scripts`.
 4. Run `bash native/check.sh`.
 5. Build the native app from a clean checkout.
@@ -342,7 +342,7 @@ For bundled local mode, users should remove:
 - No automated notarized release workflow.
 - No crash/diagnostic upload pipeline.
 - No live acceptance evidence for production claims.
-- Browser-specific Playwright/CDP lane is still a roadmap item.
+- Playwright Chromium is installed on the task image; page reads and browser_act stay behind Confirm and ORBIT_BROWSER_HOSTS.
 
 
 ## Voice-first beta release and proactive schedules

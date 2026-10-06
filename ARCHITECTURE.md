@@ -20,7 +20,7 @@ The face tab is not the work browser. The work browser is an empty Chromium. `OR
 
 A goal with one https address asks for a page read, and only when that list is set. A click, a type, or a key is `browser_act`. The card shows the URL, the verb, and the target. After a crash, the next attempt reads the page again. It does not replay a click.
 
-Playwright loads on the first page call. It is not installed in the image yet. The fast path does not import it.
+Playwright loads on the first page call in the task process. The task image installs Chromium; other service images do not launch a browser. The fast path does not import it.
 
 ## MCP
 
@@ -29,3 +29,7 @@ Playwright loads on the first page call. It is not installed in the image yet. T
 ## Refuse
 
 A host shell, auto-approve, chat-channel presence, a second voice runtime, a checkpoint that replays a click, and a memory store that replaces Redis on the talk path stay out. Pipecat, Letta, Browser Use, Stagehand, Hermes, OpenClaw, and DeepSeek Harness stay out.
+
+## Pi
+
+Pipecat and any second voice runtime stay out. A Pi note is documentation only; do not wire a second talk path or a host shell.

@@ -1,7 +1,7 @@
 *
 !Dockerfile
-!requirements-common.txt
-!constraints.txt
+!pyproject.toml
+!uv.lock
 !shared/
 !shared/**
 !services/

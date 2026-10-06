@@ -1,1 +1,1 @@
-# Service-specific dependencies; infrastructure pins are requirements-common.txt.
+# Legacy. Runtime pins are in pyproject.toml + uv.lock (uv sync).

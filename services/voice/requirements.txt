@@ -1,1 +1,1 @@
-# Realtime and native WebSocket transport is pinned in requirements-common.txt.
+# Legacy. Runtime pins are in pyproject.toml + uv.lock (uv sync).

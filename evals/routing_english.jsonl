@@ -1,0 +1,100 @@
+{"id": "calibration-01", "split": "calibration", "utterance": "Open Notes.", "expected": "open_notes"}
+{"id": "calibration-02", "split": "calibration", "utterance": "Orbit, open Notes.", "expected": "open_notes"}
+{"id": "calibration-03", "split": "calibration", "utterance": "Please launch Notes.", "expected": "open_notes"}
+{"id": "calibration-04", "split": "calibration", "utterance": "Could you open Apple Notes?", "expected": "open_notes"}
+{"id": "calibration-05", "split": "calibration", "utterance": "Kindly bring up Notes.", "expected": "open_notes"}
+{"id": "calibration-06", "split": "calibration", "utterance": "Launch Notes app.", "expected": "open_notes"}
+{"id": "calibration-07", "split": "calibration", "utterance": "Open Chrome.", "expected": "open_chrome"}
+{"id": "calibration-08", "split": "calibration", "utterance": "Launch Google Chrome.", "expected": "open_chrome"}
+{"id": "calibration-09", "split": "calibration", "utterance": "Please bring up Chrome.", "expected": "open_chrome"}
+{"id": "calibration-10", "split": "calibration", "utterance": "Could you open Chrome browser?", "expected": "open_chrome"}
+{"id": "calibration-11", "split": "calibration", "utterance": "Orbit, launch Chrome.", "expected": "open_chrome"}
+{"id": "calibration-12", "split": "calibration", "utterance": "Kindly open Google Chrome.", "expected": "open_chrome"}
+{"id": "calibration-13", "split": "calibration", "utterance": "Open Spotify.", "expected": "open_spotify"}
+{"id": "calibration-14", "split": "calibration", "utterance": "Open the Spotify website.", "expected": "open_spotify"}
+{"id": "calibration-15", "split": "calibration", "utterance": "Please open Spotify web player.", "expected": "open_spotify"}
+{"id": "calibration-16", "split": "calibration", "utterance": "Could you launch Spotify in Chrome?", "expected": "open_spotify"}
+{"id": "calibration-17", "split": "calibration", "utterance": "Orbit, bring up Spotify web.", "expected": "open_spotify"}
+{"id": "calibration-18", "split": "calibration", "utterance": "Kindly open Spotify website.", "expected": "open_spotify"}
+{"id": "calibration-19", "split": "calibration", "utterance": "Start dictation.", "expected": "start_dictation"}
+{"id": "calibration-20", "split": "calibration", "utterance": "Start dictation in Notes.", "expected": "start_dictation"}
+{"id": "calibration-21", "split": "calibration", "utterance": "Open Notes and write the text I dictate.", "expected": "start_dictation"}
+{"id": "calibration-22", "split": "calibration", "utterance": "Start Notes dictation.", "expected": "start_dictation"}
+{"id": "calibration-23", "split": "calibration", "utterance": "Please start a new dictation in Apple Notes.", "expected": "start_dictation"}
+{"id": "calibration-24", "split": "calibration", "utterance": "Orbit, open Notes and start dictation.", "expected": "start_dictation"}
+{"id": "calibration-25", "split": "calibration", "utterance": "Do not open Notes.", "expected": "defer"}
+{"id": "calibration-26", "split": "calibration", "utterance": "Do not launch Chrome.", "expected": "defer"}
+{"id": "calibration-27", "split": "calibration", "utterance": "Do not open Spotify.", "expected": "defer"}
+{"id": "calibration-28", "split": "calibration", "utterance": "Do not start dictation.", "expected": "defer"}
+{"id": "calibration-29", "split": "calibration", "utterance": "Say open Notes.", "expected": "defer"}
+{"id": "calibration-30", "split": "calibration", "utterance": "The phrase is \"open Chrome\".", "expected": "defer"}
+{"id": "calibration-31", "split": "calibration", "utterance": "My friend said open Spotify.", "expected": "defer"}
+{"id": "calibration-32", "split": "calibration", "utterance": "Repeat start dictation.", "expected": "defer"}
+{"id": "calibration-33", "split": "calibration", "utterance": "If I ask later, open Notes.", "expected": "defer"}
+{"id": "calibration-34", "split": "calibration", "utterance": "When lunch ends, launch Chrome.", "expected": "defer"}
+{"id": "calibration-35", "split": "calibration", "utterance": "After I leave, open Spotify.", "expected": "defer"}
+{"id": "calibration-36", "split": "calibration", "utterance": "Start dictation tomorrow.", "expected": "defer"}
+{"id": "calibration-37", "split": "calibration", "utterance": "Open Notes and Chrome.", "expected": "defer"}
+{"id": "calibration-38", "split": "calibration", "utterance": "Open Chrome and research batteries.", "expected": "defer"}
+{"id": "calibration-39", "split": "calibration", "utterance": "Open Spotify and play music.", "expected": "defer"}
+{"id": "calibration-40", "split": "calibration", "utterance": "Start dictation and search the web.", "expected": "defer"}
+{"id": "calibration-41", "split": "calibration", "utterance": "Research voice interfaces and write a report.", "expected": "defer"}
+{"id": "calibration-42", "split": "calibration", "utterance": "Play Get Lucky by Daft Punk on Spotify.", "expected": "defer"}
+{"id": "calibration-43", "split": "calibration", "utterance": "Delete my Notes.", "expected": "defer"}
+{"id": "calibration-44", "split": "calibration", "utterance": "Close Chrome.", "expected": "defer"}
+{"id": "calibration-45", "split": "calibration", "utterance": "Open it.", "expected": "defer"}
+{"id": "calibration-46", "split": "calibration", "utterance": "Can it do that?", "expected": "defer"}
+{"id": "calibration-47", "split": "calibration", "utterance": "Which notes do you mean?", "expected": "defer"}
+{"id": "calibration-48", "split": "calibration", "utterance": "Where is that app?", "expected": "defer"}
+{"id": "calibration-49", "split": "calibration", "utterance": "Thank you Orbit.", "expected": "defer"}
+{"id": "calibration-50", "split": "calibration", "utterance": "How does a microphone work?", "expected": "defer"}
+{"id": "holdout-01", "split": "holdout", "utterance": "Can you please open Notes for me?", "expected": "open_notes"}
+{"id": "holdout-02", "split": "holdout", "utterance": "Open Apple Notes now.", "expected": "open_notes"}
+{"id": "holdout-03", "split": "holdout", "utterance": "Hey Orbit, launch Notes.", "expected": "open_notes"}
+{"id": "holdout-04", "split": "holdout", "utterance": "Would you bring up Apple Notes?", "expected": "open_notes"}
+{"id": "holdout-05", "split": "holdout", "utterance": "Orbit, could you kindly open Notes?", "expected": "open_notes"}
+{"id": "holdout-06", "split": "holdout", "utterance": "Please open Notes app.", "expected": "open_notes"}
+{"id": "holdout-07", "split": "holdout", "utterance": "Can you kindly open Chrome for me?", "expected": "open_chrome"}
+{"id": "holdout-08", "split": "holdout", "utterance": "Open Google Chrome now.", "expected": "open_chrome"}
+{"id": "holdout-09", "split": "holdout", "utterance": "Hey Orbit, bring up Google Chrome.", "expected": "open_chrome"}
+{"id": "holdout-10", "split": "holdout", "utterance": "Would you launch Chrome browser?", "expected": "open_chrome"}
+{"id": "holdout-11", "split": "holdout", "utterance": "Orbit, please open Chrome.", "expected": "open_chrome"}
+{"id": "holdout-12", "split": "holdout", "utterance": "Please launch Google Chrome for me.", "expected": "open_chrome"}
+{"id": "holdout-13", "split": "holdout", "utterance": "Can you please open the Spotify website?", "expected": "open_spotify"}
+{"id": "holdout-14", "split": "holdout", "utterance": "Open Spotify web in Chrome.", "expected": "open_spotify"}
+{"id": "holdout-15", "split": "holdout", "utterance": "Hey Orbit, launch the Spotify web player.", "expected": "open_spotify"}
+{"id": "holdout-16", "split": "holdout", "utterance": "Would you bring up Spotify in Chrome?", "expected": "open_spotify"}
+{"id": "holdout-17", "split": "holdout", "utterance": "Orbit, open Spotify website now.", "expected": "open_spotify"}
+{"id": "holdout-18", "split": "holdout", "utterance": "Please open Spotify for me.", "expected": "open_spotify"}
+{"id": "holdout-19", "split": "holdout", "utterance": "Could you start Notes dictation for me?", "expected": "start_dictation"}
+{"id": "holdout-20", "split": "holdout", "utterance": "Hey Orbit, start dictation in Notes.", "expected": "start_dictation"}
+{"id": "holdout-21", "split": "holdout", "utterance": "Kindly open Apple Notes and start dictation.", "expected": "start_dictation"}
+{"id": "holdout-22", "split": "holdout", "utterance": "Would you start a new Notes dictation?", "expected": "start_dictation"}
+{"id": "holdout-23", "split": "holdout", "utterance": "Orbit, please open Notes and write text I dictate.", "expected": "start_dictation"}
+{"id": "holdout-24", "split": "holdout", "utterance": "Start dictation in Apple Notes now.", "expected": "start_dictation"}
+{"id": "holdout-25", "split": "holdout", "utterance": "Never open Apple Notes.", "expected": "defer"}
+{"id": "holdout-26", "split": "holdout", "utterance": "Please do not bring up Google Chrome.", "expected": "defer"}
+{"id": "holdout-27", "split": "holdout", "utterance": "Avoid opening the Spotify website.", "expected": "defer"}
+{"id": "holdout-28", "split": "holdout", "utterance": "I do not want you to start dictation.", "expected": "defer"}
+{"id": "holdout-29", "split": "holdout", "utterance": "Write the words \"open Notes\" in this sentence.", "expected": "defer"}
+{"id": "holdout-30", "split": "holdout", "utterance": "She asked me to launch Chrome yesterday.", "expected": "defer"}
+{"id": "holdout-31", "split": "holdout", "utterance": "Is \"open Spotify\" a command?", "expected": "defer"}
+{"id": "holdout-32", "split": "holdout", "utterance": "The document says start dictation.", "expected": "defer"}
+{"id": "holdout-33", "split": "holdout", "utterance": "Unless I say stop, open Notes in an hour.", "expected": "defer"}
+{"id": "holdout-34", "split": "holdout", "utterance": "If the meeting ends, open Chrome.", "expected": "defer"}
+{"id": "holdout-35", "split": "holdout", "utterance": "Could you open Spotify after work?", "expected": "defer"}
+{"id": "holdout-36", "split": "holdout", "utterance": "Next Monday I will start dictation.", "expected": "defer"}
+{"id": "holdout-37", "split": "holdout", "utterance": "Launch Notes, then open Chrome.", "expected": "defer"}
+{"id": "holdout-38", "split": "holdout", "utterance": "Open Chrome and type a search query.", "expected": "defer"}
+{"id": "holdout-39", "split": "holdout", "utterance": "Open the Spotify website and play Get Lucky.", "expected": "defer"}
+{"id": "holdout-40", "split": "holdout", "utterance": "Start dictation and create a research report.", "expected": "defer"}
+{"id": "holdout-41", "split": "holdout", "utterance": "Compare Realtime and Jev using official sources.", "expected": "defer"}
+{"id": "holdout-42", "split": "holdout", "utterance": "Pause Spotify playback.", "expected": "defer"}
+{"id": "holdout-43", "split": "holdout", "utterance": "Rename the note I created yesterday.", "expected": "defer"}
+{"id": "holdout-44", "split": "holdout", "utterance": "Install a Chrome extension.", "expected": "defer"}
+{"id": "holdout-45", "split": "holdout", "utterance": "Open the other one.", "expected": "defer"}
+{"id": "holdout-46", "split": "holdout", "utterance": "Can you start that now?", "expected": "defer"}
+{"id": "holdout-47", "split": "holdout", "utterance": "Notes or Chrome, which is better?", "expected": "defer"}
+{"id": "holdout-48", "split": "holdout", "utterance": "I might want Spotify later.", "expected": "defer"}
+{"id": "holdout-49", "split": "holdout", "utterance": "Good evening, Orbit.", "expected": "defer"}
+{"id": "holdout-50", "split": "holdout", "utterance": "Explain how speech recognition handles Indian accents.", "expected": "defer"}

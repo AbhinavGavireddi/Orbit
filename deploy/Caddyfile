@@ -1,0 +1,23 @@
+{
+  email {$ACME_EMAIL}
+}
+
+{$ORBIT_TASK_HOST} {
+  encode zstd gzip
+  header {
+    Strict-Transport-Security "max-age=31536000"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "no-referrer"
+  }
+  reverse_proxy task:8100
+}
+
+{$ORBIT_VOICE_HOST} {
+  encode zstd gzip
+  header {
+    Strict-Transport-Security "max-age=31536000"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "no-referrer"
+  }
+  reverse_proxy voice:8101
+}

@@ -1,0 +1,155 @@
+{
+  "description": "Thirty fixed English utterances; synthesized voice tests do not establish Indian-accented microphone accuracy. No destructive operations.",
+  "fixtures": [
+    {
+      "id": "voice-01",
+      "text": "Can you please open Notes for me?",
+      "expected_capability": "open_notes"
+    },
+    {
+      "id": "voice-02",
+      "text": "Open Apple Notes now.",
+      "expected_capability": "open_notes"
+    },
+    {
+      "id": "voice-03",
+      "text": "Hey Orbit, launch Notes.",
+      "expected_capability": "open_notes"
+    },
+    {
+      "id": "voice-04",
+      "text": "Would you bring up Apple Notes?",
+      "expected_capability": "open_notes"
+    },
+    {
+      "id": "voice-05",
+      "text": "Orbit, could you kindly open Notes?",
+      "expected_capability": "open_notes"
+    },
+    {
+      "id": "voice-06",
+      "text": "Please open Notes app.",
+      "expected_capability": "open_notes"
+    },
+    {
+      "id": "voice-07",
+      "text": "Can you kindly open Chrome for me?",
+      "expected_capability": "open_chrome"
+    },
+    {
+      "id": "voice-08",
+      "text": "Open Google Chrome now.",
+      "expected_capability": "open_chrome"
+    },
+    {
+      "id": "voice-09",
+      "text": "Hey Orbit, bring up Google Chrome.",
+      "expected_capability": "open_chrome"
+    },
+    {
+      "id": "voice-10",
+      "text": "Would you launch Chrome browser?",
+      "expected_capability": "open_chrome"
+    },
+    {
+      "id": "voice-11",
+      "text": "Orbit, please open Chrome.",
+      "expected_capability": "open_chrome"
+    },
+    {
+      "id": "voice-12",
+      "text": "Please launch Google Chrome for me.",
+      "expected_capability": "open_chrome"
+    },
+    {
+      "id": "voice-13",
+      "text": "Can you please open the Spotify website?",
+      "expected_capability": "open_spotify"
+    },
+    {
+      "id": "voice-14",
+      "text": "Open Spotify web in Chrome.",
+      "expected_capability": "open_spotify"
+    },
+    {
+      "id": "voice-15",
+      "text": "Hey Orbit, launch the Spotify web player.",
+      "expected_capability": "open_spotify"
+    },
+    {
+      "id": "voice-16",
+      "text": "Would you bring up Spotify in Chrome?",
+      "expected_capability": "open_spotify"
+    },
+    {
+      "id": "voice-17",
+      "text": "Orbit, open Spotify website now.",
+      "expected_capability": "open_spotify"
+    },
+    {
+      "id": "voice-18",
+      "text": "Please open Spotify for me.",
+      "expected_capability": "open_spotify"
+    },
+    {
+      "id": "voice-19",
+      "text": "Could you start Notes dictation for me?",
+      "expected_capability": "start_dictation"
+    },
+    {
+      "id": "voice-20",
+      "text": "Hey Orbit, start dictation in Notes.",
+      "expected_capability": "start_dictation"
+    },
+    {
+      "id": "voice-21",
+      "text": "Kindly open Apple Notes and start dictation.",
+      "expected_capability": "start_dictation"
+    },
+    {
+      "id": "voice-22",
+      "text": "Would you start a new Notes dictation?",
+      "expected_capability": "start_dictation"
+    },
+    {
+      "id": "voice-23",
+      "text": "Orbit, please open Notes and write text I dictate.",
+      "expected_capability": "start_dictation"
+    },
+    {
+      "id": "voice-24",
+      "text": "Start dictation in Apple Notes now.",
+      "expected_capability": "start_dictation"
+    },
+    {
+      "id": "voice-25",
+      "text": "Good morning Orbit.",
+      "expected_capability": null
+    },
+    {
+      "id": "voice-26",
+      "text": "What is two plus three?",
+      "expected_capability": null
+    },
+    {
+      "id": "voice-27",
+      "text": "Explain an API in one sentence.",
+      "expected_capability": null
+    },
+    {
+      "id": "voice-28",
+      "text": "What does idempotent mean?",
+      "expected_capability": null
+    },
+    {
+      "id": "voice-29",
+      "text": "Tell me a short joke.",
+      "expected_capability": null
+    },
+    {
+      "id": "voice-30",
+      "text": "Thanks, that helps.",
+      "expected_capability": null
+    }
+  ]
+}

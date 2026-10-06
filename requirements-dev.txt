@@ -1,0 +1,13 @@
+# Legacy mirror. Install with: uv sync --group dev
+# Pins live in pyproject.toml + uv.lock.
+-r requirements-common.txt
+pytest==9.1.1
+pytest-asyncio==1.4.0
+fakeredis[lua]==2.38.0
+ruff==0.16.8
+pyyaml==6.0.2
+python-dotenv==1.1.1
+playwright==1.55.0
+langgraph==1.2.2
+reportlab==5.0.1
+pypdf==6.19.0

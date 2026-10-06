@@ -1,0 +1,2 @@
+# Legacy. Prefer uv.lock. Regenerated historically via uv pip compile;
+# do not use as the primary install surface.

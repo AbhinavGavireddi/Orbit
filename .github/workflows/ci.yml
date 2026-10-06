@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    name: Python tests and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: |
+          uv venv --python 3.13
+          uv pip install --python .venv/bin/python -r requirements-dev.txt
+      - name: Whitespace check
+        run: git diff --check
+      - name: Ruff
+        run: .venv/bin/ruff check shared services tests scripts
+      - name: Pytest
+        run: .venv/bin/python -m pytest -q
+      - name: Release hygiene
+        run: .venv/bin/python scripts/check_release.py
+
+  docker:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build service images
+        run: docker buildx bake --set '*.platform=linux/amd64' --load
+
+  native:
+    name: Native build and tests
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: |
+          export DEVELOPER_DIR="$(xcode-select -p)"
+          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+          bash native/check.sh

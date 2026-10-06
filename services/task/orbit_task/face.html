@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orbit face</title>
+  <style>
+    :root { color-scheme: dark; --ink: #f3eadf; --dim: #b7aa9c; --line: #3a332c; --card: #241f1a; --lamp: #e7b15a; }
+    body { margin: 0; min-height: 100vh; background: #14110e; color: var(--ink);
+      font: 18px/1.4 "Avenir Next", "Segoe UI", sans-serif; }
+    main { max-width: 520px; margin: 0 auto; padding: 28px 20px 40px; }
+    h1 { font-weight: 500; font-size: 32px; margin: 0 0 8px; }
+    p, li { color: var(--dim); }
+    label { display: block; margin: 14px 0 6px; color: var(--dim); font-size: 14px; }
+    input { width: 100%; box-sizing: border-box; border: 1px solid var(--line); background: #1c1814;
+      color: var(--ink); border-radius: 10px; padding: 12px; font: inherit; }
+    .screen { margin: 22px 0; min-height: 180px; border-radius: 28px; background: #1a1612;
+      border: 10px solid #2c261f; padding: 18px; }
+    #state { margin: 0 0 8px; color: var(--lamp); }
+    #log { margin: 0; padding: 0; list-style: none; max-height: 220px; overflow: auto; }
+    #log li { margin: 0 0 8px; }
+    .payload { margin-top: 8px; color: var(--lamp); white-space: pre-wrap; }
+    .row { display: flex; gap: 10px; }
+    button { flex: 1; border: 0; border-radius: 999px; padding: 14px 16px; font: inherit; cursor: pointer; }
+    button:disabled { opacity: 0.45; cursor: default; }
+    #talk { background: #3a3128; color: var(--ink); }
+    #confirm, #schedule, #dismiss { background: var(--card); color: var(--dim); border: 1px solid var(--line); }
+    #confirm.live, #schedule.live, #dismiss.live { background: var(--lamp); color: #24180c; }
+    .record { margin-top: 16px; }
+    .record a { color: var(--lamp); }
+    #tasks { margin: 8px 0 0; padding-left: 18px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Orbit</h1>
+    <p>Talk sends the sentence or the microphone. Confirm grants one action. Schedule confirms one follow-up. Dismiss closes a due reminder. These controls are different.</p>
+    <label for="token">Device token</label>
+    <input id="token" type="password" autocomplete="off">
+    <label for="sentence">Sentence</label>
+    <input id="sentence" value="">
+    <div class="screen" id="screen">
+      <p id="state">The desk is quiet.</p>
+      <ul id="log"></ul>
+      <div id="card"></div>
+    </div>
+    <div class="row">
+      <button id="talk" type="button">Talk</button>
+      <button id="confirm" type="button" disabled>Confirm</button>
+      <button id="schedule" type="button" disabled>Schedule</button>
+      <button id="dismiss" type="button" disabled>Dismiss</button>
+    </div>
+    <div class="record" id="record">No record yet</div>
+    <ul id="tasks"></ul>
+    <p id="epoch">Epoch 1</p>
+  </main>
+  <script>
+    const tokenInput = document.querySelector("#token");
+    const sentence = document.querySelector("#sentence");
+    const stateLine = document.querySelector("#state");
+    const log = document.querySelector("#log");
+    const cardBox = document.querySelector("#card");
+    const talk = document.querySelector("#talk");
+    const confirm = document.querySelector("#confirm");
+    const schedule = document.querySelector("#schedule");
+    const dismiss = document.querySelector("#dismiss");
+    const record = document.querySelector("#record");
+    const taskList = document.querySelector("#tasks");
+    const epochText = document.querySelector("#epoch");
+    let phase = "idle";
+    let card = null;
+    let proposed = null;
+    let due = null;
+    let epoch = 1;
+    let socket = null;
+    let voice = null;
+    let sessionId = null;
+    let mic = null;
+    let audioCtx = null;
+    let playHead = 0;
+    let meta = null;
+    let playedMs = 0;
+    let blockedItem = null;
+    let gateOpen = true;
+    let dropBinary = false;
+    let pulse = null;
+    const sources = [];
+    const tasks = new Map();
+
+    function setEpoch() { epochText.textContent = "Epoch " + epoch; }
+    function line(role, text) {
+      const item = document.createElement("li");
+      item.textContent = role + ": " + text;
+      log.append(item);
+      log.scrollTop = log.scrollHeight;
+    }
+    function authHeaders() {
+      return { "Authorization": "Bearer " + tokenInput.value.trim() };
+    }
+    async function api(path, body, method) {
+      const response = await fetch(path, {
+        method: method || "POST",
+        headers: Object.assign({ "Content-Type": "application/json" }, authHeaders()),
+        body: body ? JSON.stringify(body) : undefined
+      });
+      if (!response.ok) throw new Error("Request failed");
+      return response.json();
+    }
+    function openSocket(path, host) {
+      const protocol = location.protocol === "https:" ? "wss" : "ws";
+      const next = new WebSocket((host || (protocol + "://" + location.host)) + path);
+      next.binaryType = "arraybuffer";
+      const opened = new Promise((resolve, reject) => {
+        next.addEventListener("open", () => resolve(next), { once: true });
+        next.addEventListener("error", () => reject(new Error("socket")), { once: true });
+      });
+      return { socket: next, opened };
+    }
+    function showRule(rule) {
+      if (!rule || rule.status !== "proposed") {
+        proposed = null;
+        schedule.disabled = true;
+        schedule.classList.remove("live");
+        return;
+      }
+      proposed = rule;
+      schedule.disabled = false;
+      schedule.classList.add("live");
+      if (phase !== "card") stateLine.textContent = rule.spec.text;
+    }
+    function showDue(delivery) {
+      if (!delivery) {
+        due = null;
+        dismiss.disabled = true;
+        dismiss.classList.remove("live");
+        return;
+      }
+      due = delivery;
+      dismiss.disabled = false;
+      dismiss.classList.add("live");
+      stateLine.textContent = delivery.text;
+    }
+    function drawTasks() {
+      taskList.textContent = "";
+      tasks.forEach((task) => {
+        const item = document.createElement("li");
+        const summary = (task.result && task.result.summary) || task.progress || task.status;
+        item.textContent = (task.goal || task.kind || "Task") + " — " + summary;
+        taskList.append(item);
+      });
+    }
+    async function showArtifacts(task) {
+      const artifacts = (task.result && task.result.artifacts) || [];
+      for (const artifact of artifacts) {
+        const response = await fetch("/v1/artifacts/" + artifact.artifact_id, { headers: authHeaders() });
+        if (!response.ok) continue;
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = artifact.filename || "orbit-report";
+        link.textContent = artifact.filename || "Report";
+        record.append(document.createElement("br"), link);
+      }
+    }
+    function finish(text) {
+      phase = "idle";
+      card = null;
+      cardBox.textContent = "";
+      confirm.disabled = true;
+      confirm.classList.remove("live");
+      stateLine.textContent = text;
+      record.textContent = text;
+    }
+    function stopPlayback() {
+      sources.splice(0).forEach((source) => {
+        source.onended = null;
+        try { source.stop(); } catch (error) { /* The clip already ended. */ }
+      });
+      playHead = audioCtx ? audioCtx.currentTime : 0;
+    }
+    function heardPosition() {
+      if (!meta) return [];
+      return [{ item_id: meta.item_id, content_index: meta.content_index || 0, audio_end_ms: playedMs }];
+    }
+    function cutPlayback() {
+      if (meta && meta.item_id) blockedItem = meta.item_id;
+      gateOpen = false;
+      dropBinary = true;
+      stopPlayback();
+    }
+    function playPcm(buffer) {
+      if (dropBinary || !gateOpen) return;
+      if (!audioCtx) audioCtx = new AudioContext({ sampleRate: 24000 });
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      const samples = new Int16Array(buffer);
+      const floats = new Float32Array(samples.length);
+      for (let i = 0; i < samples.length; i += 1) floats[i] = samples[i] / 32768;
+      const audioBuffer = audioCtx.createBuffer(1, floats.length, 24000);
+      audioBuffer.copyToChannel(floats, 0);
+      const source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioCtx.destination);
+      sources.push(source);
+      const start = Math.max(audioCtx.currentTime, playHead);
+      source.start(start);
+      playHead = start + audioBuffer.duration;
+      playedMs += Math.round(audioBuffer.duration * 1000);
+      voice.send(JSON.stringify({ type: "playback.state", playing: true }));
+      source.onended = () => {
+        if (!meta || !voice || voice.readyState !== WebSocket.OPEN) return;
+        voice.send(JSON.stringify({
+          type: "audio.played",
+          item_id: meta.item_id,
+          content_index: meta.content_index,
+          audio_end_ms: playedMs
+        }));
+        if (audioCtx.currentTime >= playHead - 0.05) {
+          voice.send(JSON.stringify({ type: "playback.state", playing: false }));
+        }
+      };
+    }
+    function watch(taskSocket) {
+      taskSocket.onmessage = (event) => {
+        const frame = JSON.parse(event.data);
+        if (frame.type === "device.command") {
+          taskSocket.send(JSON.stringify({
+            type: "device.result",
+            task_id: frame.task_id,
+            action_id: frame.action_id,
+            fence: frame.fence,
+            ok: false,
+            error: "This client has no desktop."
+          }));
+          return;
+        }
+        if (frame.type === "confirmation") {
+          card = frame;
+          phase = "card";
+          confirm.disabled = false;
+          confirm.classList.add("live");
+          cardBox.textContent = "";
+          const title = document.createElement("div");
+          title.textContent = frame.payload ? "Allow this call?" : "Allow this action?";
+          const payload = document.createElement("div");
+          payload.className = "payload";
+          payload.textContent = frame.summary || frame.payload || "";
+          cardBox.append(title, payload);
+        }
+        if (frame.type === "followup.snapshot") {
+          showRule((frame.rules || []).find((rule) => rule.status === "proposed"));
+          showDue((frame.due || [])[0]);
+        }
+        if (frame.type === "followup.changed") showRule(frame.rule);
+        if (frame.type === "followup.due") showDue(frame.delivery);
+        if (frame.type === "task.event" && frame.task) {
+          const task = frame.task;
+          tasks.set(task.task_id, task);
+          drawTasks();
+          if (task.status === "completed" || task.status === "failed" || task.status === "cancelled" || task.status === "blocked") {
+            const summary = (task.result && (task.result.summary || task.result.error)) || task.error || task.status;
+            finish(summary);
+            showArtifacts(task);
+          }
+        }
+      };
+    }
+    function watchVoice(voiceSocket) {
+      voiceSocket.onmessage = (event) => {
+        if (typeof event.data !== "string") {
+          if (dropBinary || !gateOpen) return;
+          playPcm(event.data);
+          return;
+        }
+        const frame = JSON.parse(event.data);
+        if (frame.type === "ready") stateLine.textContent = "Voice ready";
+        if (frame.type === "state") stateLine.textContent = frame.state;
+        if (frame.type === "audio.meta") {
+          const sameCut = blockedItem && frame.item_id === blockedItem;
+          if (!gateOpen || sameCut) {
+            dropBinary = true;
+          } else {
+            dropBinary = false;
+            if (frame.item_id && frame.item_id !== blockedItem) blockedItem = null;
+            if (!meta || meta.item_id !== frame.item_id) playedMs = 0;
+            meta = frame;
+          }
+        }
+        if (frame.type === "audio.clear") {
+          const positions = heardPosition();
+          stopPlayback();
+          gateOpen = true;
+          voiceSocket.send(JSON.stringify({
+            type: "audio.cleared",
+            interruption_id: frame.interruption_id,
+            generation: frame.generation,
+            positions
+          }));
+        }
+        if (frame.type === "transcript") {
+          line(frame.role || "orbit", frame.text || "");
+          if (frame.role === "assistant" && phase !== "card") phase = "idle";
+        }
+        if (frame.type === "error") finish(frame.message || "Voice failed");
+        if (frame.type === "task.started" && frame.task) {
+          tasks.set(frame.task.task_id, frame.task);
+          drawTasks();
+          if (phase !== "card") stateLine.textContent = "Task started";
+        }
+      };
+    }
+    async function connect() {
+      if (socket && voice && socket.readyState === WebSocket.OPEN && voice.readyState === WebSocket.OPEN) return;
+      const session = await api("/v1/sessions", { device_id: "face" });
+      sessionId = session.session_id;
+      const tickets = await api("/v1/sessions/" + sessionId + "/face-ticket", {});
+      const task = openSocket("/v1/devices/face/ws?session_id=" + sessionId + "&ticket=" + encodeURIComponent(tickets.ticket));
+      const speech = openSocket("/v1/voice?session_id=" + sessionId + "&device_id=face&ticket=" + encodeURIComponent(tickets.voice_ticket),
+        (location.protocol === "https:" ? "wss" : "ws") + "://" + location.hostname + ":8101");
+      socket = task.socket;
+      voice = speech.socket;
+      watch(socket);
+      watchVoice(voice);
+      await task.opened;
+      await speech.opened;
+      const desk = socket;
+      desk.addEventListener("close", () => {
+        if (socket === desk) stateLine.textContent = "The desk disconnected. Press Talk to return.";
+      });
+      if (pulse) clearInterval(pulse);
+      pulse = setInterval(() => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: "ping" }));
+        }
+      }, 10000);
+    }
+    async function startMic() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const ctx = new AudioContext({ sampleRate: 24000 });
+      const source = ctx.createMediaStreamSource(stream);
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      const processor = ctx.createScriptProcessor(2048, 1, 1);
+      processor.onaudioprocess = (event) => {
+        if (!voice || voice.readyState !== WebSocket.OPEN) return;
+        const input = event.inputBuffer.getChannelData(0);
+        const pcm = new Int16Array(input.length);
+        for (let i = 0; i < input.length; i += 1) {
+          const sample = Math.max(-1, Math.min(1, input[i]));
+          pcm[i] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+        }
+        voice.send(pcm.buffer);
+      };
+      source.connect(processor);
+      processor.connect(gain);
+      gain.connect(ctx.destination);
+      mic = { stream, ctx, processor };
+    }
+    function stopMic() {
+      if (!mic) return;
+      mic.processor.disconnect();
+      mic.stream.getTracks().forEach((track) => track.stop());
+      mic.ctx.close();
+      mic = null;
+    }
+    talk.addEventListener("pointerdown", async () => {
+      if (phase === "card" && card && socket) {
+        const retired = card;
+        phase = "sent";
+        epoch += 1;
+        setEpoch();
+        confirm.disabled = true;
+        confirm.classList.remove("live");
+        socket.send(JSON.stringify({
+          type: "confirmation.response",
+          approved: false,
+          task_id: retired.task_id,
+          action_id: retired.action_id,
+          version: retired.version
+        }));
+        return;
+      }
+      const text = sentence.value.trim();
+      const replace = phase === "sent" || Boolean(meta);
+      const positions = replace ? heardPosition() : null;
+      if (replace) cutPlayback();
+      phase = "sent";
+      try {
+        await connect();
+        if (replace) {
+          if (text) {
+            voice.send(JSON.stringify({ type: "text", text, positions }));
+            return;
+          }
+          voice.send(JSON.stringify({ type: "interrupt", positions }));
+        }
+        if (text) voice.send(JSON.stringify({ type: "text", text }));
+        else await startMic();
+      } catch (error) {
+        finish("The sentence did not leave the face.");
+      }
+    });
+    talk.addEventListener("pointerup", () => stopMic());
+    talk.addEventListener("pointercancel", () => stopMic());
+    confirm.addEventListener("pointerdown", () => {
+      if (phase !== "card" || !card || !socket) return;
+      phase = "sent";
+      confirm.disabled = true;
+      confirm.classList.remove("live");
+      socket.send(JSON.stringify({
+        type: "confirmation.response",
+        approved: true,
+        task_id: card.task_id,
+        action_id: card.action_id,
+        version: card.version
+      }));
+    });
+    schedule.addEventListener("pointerdown", async () => {
+      if (!proposed || !sessionId) return;
+      const rule = proposed;
+      schedule.disabled = true;
+      schedule.classList.remove("live");
+      try {
+        await api("/v1/sessions/" + sessionId + "/followups/" + rule.id + "/confirm", { version: rule.version });
+        stateLine.textContent = "The follow-up is confirmed.";
+      } catch (error) {
+        schedule.disabled = false;
+        schedule.classList.add("live");
+        stateLine.textContent = "The follow-up was not confirmed.";
+      }
+    });
+    dismiss.addEventListener("pointerdown", async () => {
+      if (!due || !sessionId) return;
+      const delivery = due;
+      dismiss.disabled = true;
+      dismiss.classList.remove("live");
+      try {
+        await api("/v1/sessions/" + sessionId + "/followup-receipts", { delivery_id: delivery.delivery_id });
+        due = null;
+        stateLine.textContent = "The reminder is dismissed.";
+      } catch (error) {
+        dismiss.disabled = false;
+        dismiss.classList.add("live");
+      }
+    });
+  </script>
+</body>
+</html>

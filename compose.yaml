@@ -1,0 +1,124 @@
+name: orbit
+
+x-runtime: &runtime
+  restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs: [/tmp:size=64m]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  networks: [backend]
+  stop_grace_period: 15s
+  mem_limit: 512m
+  cpus: 1.0
+  healthcheck:
+    test: [CMD, python, -c, "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.environ['ORBIT_PORT']+'/healthz',timeout=2)"]
+    interval: 10s
+    timeout: 3s
+    retries: 3
+    start_period: 15s
+
+x-auth: &auth
+  ORBIT_DEVICE_TOKEN: ${ORBIT_DEVICE_TOKEN:?Run python3 scripts/setup.py}
+  ORBIT_SERVICE_TOKEN: ${ORBIT_SERVICE_TOKEN:?Run python3 scripts/setup.py}
+  REDIS_URL: redis://redis:6379/0
+  ORBIT_TASK_URL: http://task:8100
+  ORBIT_ARTIFACT_DIR: /data/artifacts
+
+services:
+  redis:
+    image: redis:7.4.6-alpine
+    command: [redis-server, --appendonly, "yes", --maxmemory, 128mb, --maxmemory-policy, noeviction]
+    networks: [backend]
+    volumes: [redis-data:/data]
+    restart: unless-stopped
+    mem_limit: 192m
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  task:
+    <<: *runtime
+    image: orbit-task:prototype
+    build: {context: ., args: {SERVICE: task}}
+    environment:
+      <<: *auth
+      ORBIT_PORT: "8100"
+      ORBIT_DECISION_URL: http://decision:8104
+      ORBIT_ROOM_URL: http://room:8105
+    ports: [127.0.0.1:8100:8100]
+    volumes: [artifacts:/data/artifacts]
+    depends_on:
+      redis: {condition: service_healthy}
+      room: {condition: service_healthy}
+  room:
+    <<: *runtime
+    image: orbit-room:prototype
+    build: {context: ., args: {SERVICE: room}}
+    environment:
+      <<: *auth
+      ORBIT_PORT: "8105"
+    ports: [127.0.0.1:8105:8105]
+  voice:
+    <<: *runtime
+    image: orbit-voice:prototype
+    build: {context: ., args: {SERVICE: voice}}
+    environment:
+      <<: *auth
+      ORBIT_PORT: "8101"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ORBIT_REALTIME_MODEL: ${ORBIT_REALTIME_MODEL:-gpt-realtime-2.1-mini}
+      ORBIT_TRANSCRIBE_MODEL: ${ORBIT_TRANSCRIBE_MODEL:-gpt-4o-transcribe}
+      ORBIT_JEV_MODEL: ${ORBIT_JEV_MODEL:-jev-1.13.0}
+      ORBIT_JEV_MODE: ${ORBIT_JEV_MODE:-shadow}
+      ORBIT_JEV_CAPABILITIES: ${ORBIT_JEV_CAPABILITIES:-}
+      ORBIT_VAD_EAGERNESS: ${ORBIT_VAD_EAGERNESS:-medium}
+      ORBIT_DECISION_URL: http://decision:8104
+      ORBIT_SKILL_ROOTS: ${ORBIT_SKILL_ROOTS:-}
+    ports: [127.0.0.1:8101:8101]
+    depends_on:
+      task: {condition: service_healthy}
+  automation:
+    <<: *runtime
+    image: orbit-automation:prototype
+    build: {context: ., args: {SERVICE: automation}}
+    environment:
+      <<: *auth
+      ORBIT_PORT: "8102"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ORBIT_AGENT_MODEL: ${ORBIT_AGENT_MODEL:-gpt-5.6-sol}
+      ORBIT_MAX_TASK_STEPS: ${ORBIT_MAX_TASK_STEPS:-30}
+      ORBIT_DECISION_URL: http://decision:8104
+      ORBIT_SKILL_ROOTS: ${ORBIT_SKILL_ROOTS:-}
+      ORBIT_LEARNED_SKILLS_DIR: ${ORBIT_LEARNED_SKILLS_DIR:-}
+    depends_on:
+      task: {condition: service_healthy}
+  research:
+    <<: *runtime
+    image: orbit-research:prototype
+    build: {context: ., args: {SERVICE: research}}
+    environment:
+      <<: *auth
+      ORBIT_PORT: "8103"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ORBIT_AGENT_MODEL: ${ORBIT_AGENT_MODEL:-gpt-5.6-sol}
+    volumes: [artifacts:/data/artifacts]
+    depends_on:
+      task: {condition: service_healthy}
+  decision:
+    <<: *runtime
+    image: orbit-decision:prototype
+    build: {context: ., args: {SERVICE: decision}}
+    environment:
+      <<: *auth
+      ORBIT_PORT: "8104"
+      TYPESAFE_API_KEY: ${TYPESAFE_API_KEY:-}
+      ORBIT_JEV_MODEL: ${ORBIT_JEV_MODEL:-jev-1.13.0}
+
+volumes:
+  redis-data:
+  artifacts:
+networks:
+  backend:
+    driver: bridge

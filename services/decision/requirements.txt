@@ -1,0 +1,1 @@
+# HTTP provider adapter uses the shared httpx dependency.

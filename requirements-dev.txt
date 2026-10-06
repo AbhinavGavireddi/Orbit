@@ -1,0 +1,9 @@
+-c constraints.txt
+-r requirements-common.txt
+-r services/voice/requirements.txt
+-r services/automation/requirements.txt
+-r services/research/requirements.txt
+pytest==9.1.1
+pytest-asyncio==1.4.0
+fakeredis[lua]==2.38.0
+ruff==0.16.8

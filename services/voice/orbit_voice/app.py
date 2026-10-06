@@ -15,9 +15,10 @@ from redis.asyncio import Redis
 from websockets.asyncio.client import connect
 
 from orbit_common.config import Settings
+from orbit_common.embeddings import embed_texts
 from orbit_common.memory import (
-    candidate_sentence, memory_instructions, memory_kind, rank_memories, selected_episodes,
-    standing_preferences, wants_forget,
+    candidate_sentence, memory_instructions, memory_kind, rank_memories_semantic,
+    selected_episodes, standing_preferences, wants_forget,
 )
 from orbit_common.routing import ACTING, CAPABILITIES, SPEAKING, explicit_capability, imperative
 from orbit_common.skills import index_skills, roots_from_setting, shortlist_skills
@@ -435,7 +436,12 @@ class VoiceSession:
         except (httpx.HTTPError, KeyError, ValueError, TypeError, AttributeError):
             listed = []
         standing = standing_preferences(listed)
-        ranked = rank_memories(transcript, listed)
+        query_vec = None
+        if transcript:
+            vectors = await embed_texts([transcript])
+            if vectors:
+                query_vec = vectors[0]
+        ranked = rank_memories_semantic(transcript, listed, query_vec)
         choice = "few" if ranked else "none"
         if ranked and self.route_open(generation):
             choice = await self.decisions().choose(transcript, "recall", ["none", "one", "few"]) or "none"

@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from orbit_common.effects import Effects, is_host, is_read
+from orbit_common.embeddings import embed_texts
 from orbit_common.routing import CAPABILITIES
 from .policy import approval_summary, card_payload, validate_action
 from .turns import TurnCoordinator, scoped_key
@@ -450,7 +451,19 @@ class Store:
             raw = await self.redis.get("orbit:memory:" + mid)
             if raw:
                 records.append(json.loads(raw))
+        await self._backfill_embeddings(records)
         return records
+
+    async def _backfill_embeddings(self, records, cap=20):
+        missing = [item for item in records if not item.get("embedding")][:cap]
+        if not missing:
+            return
+        vectors = await embed_texts([item["text"] for item in missing])
+        for item, vector in zip(missing, vectors):
+            if vector is None:
+                continue
+            item["embedding"] = vector
+            await self.redis.set("orbit:memory:" + item["id"], json.dumps(item))
 
     async def remember(self, text, kind, source_turn):
         if kind not in {"preference", "episode"} or not isinstance(text, str):
@@ -460,6 +473,9 @@ class Store:
             raise ValueError("A memory is one preference or episode sentence")
         record = {"id": str(uuid.uuid4()), "text": text, "kind": kind,
                   "created_at": time.time(), "source_turn": source_turn or ""}
+        vectors = await embed_texts([record["text"]])
+        if vectors and vectors[0] is not None:
+            record["embedding"] = vectors[0]
         await self.redis.set("orbit:memory:" + record["id"], json.dumps(record))
         await self.redis.lpush("orbit:memory:order", record["id"])
         overflow = await self.redis.lrange("orbit:memory:order", 200, -1)

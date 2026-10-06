@@ -64,3 +64,26 @@ def memory_instructions(choice, standing, episodes):
     lines.extend("Standing preference: " + item["text"] for item in standing)
     lines.extend("Related memory: " + item["text"] for item in episodes)
     return "\n".join(lines)
+
+
+def rank_memories_semantic(utterance, memories, query_vec, limit=5):
+    """Merge keyword overlap with vector similarity; attach match_reason."""
+    from orbit_common.embeddings import cosine
+    scored = []
+    for memory in memories:
+        if memory.get("kind") == "preference":
+            continue
+        lex = len(terms(memory.get("text", "")) & terms(utterance))
+        sim = cosine(query_vec, memory.get("embedding")) if query_vec else 0.0
+        if lex == 0 and sim < 0.75:
+            continue
+        reason_parts = []
+        if lex:
+            reason_parts.append(f"shared {lex} term(s)")
+        if sim >= 0.75:
+            reason_parts.append(f"similar meaning ({sim:.2f})")
+        item = dict(memory)
+        item["match_reason"] = "; ".join(reason_parts) or "related"
+        scored.append((lex + sim * 2, memory.get("created_at", 0), item))
+    scored.sort(key=lambda row: (row[0], row[1]), reverse=True)
+    return [row[2] for row in scored[:limit]]

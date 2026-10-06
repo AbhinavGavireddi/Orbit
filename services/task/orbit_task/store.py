@@ -451,10 +451,10 @@ class Store:
             raw = await self.redis.get("orbit:memory:" + mid)
             if raw:
                 records.append(json.loads(raw))
-        await self._backfill_embeddings(records)
         return records
 
-    async def _backfill_embeddings(self, records, cap=20):
+    async def backfill_embeddings(self, records, cap=20):
+        """Lazy Redis-side embed fill for recall; not used on plain list."""
         missing = [item for item in records if not item.get("embedding")][:cap]
         if not missing:
             return

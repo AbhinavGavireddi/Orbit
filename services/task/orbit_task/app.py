@@ -7,7 +7,7 @@ from pathlib import Path
 
 import anyio
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Query, Depends, FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from redis.asyncio import Redis
 
@@ -204,8 +204,11 @@ def create_app(settings=None, redis=None):
                                   body.capability, body.skill_name, body.constraints, body.completion_criteria)
 
     @app.get("/v1/memories", dependencies=[Depends(service)])
-    async def list_memories():
-        return {"memories": await store.memories()}
+    async def list_memories(backfill: bool = Query(False)):
+        records = await store.memories()
+        if backfill:
+            await store.backfill_embeddings(records)
+        return {"memories": records}
 
     @app.post("/v1/memories", dependencies=[Depends(service)])
     async def create_memory(body: MemoryCreate):

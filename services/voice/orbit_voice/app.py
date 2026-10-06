@@ -430,7 +430,7 @@ class VoiceSession:
     async def recall(self, transcript, turn_id, generation):
         listed = []
         try:
-            payload = await self.api("GET", "/v1/memories")
+            payload = await self.api("GET", "/v1/memories", params={"backfill": "true"})
             if isinstance(payload.get("memories"), list):
                 listed = payload["memories"]
         except (httpx.HTTPError, KeyError, ValueError, TypeError, AttributeError):

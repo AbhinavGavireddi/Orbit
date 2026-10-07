@@ -17,8 +17,13 @@ PROVIDER_KEYS = {"OPENAI_API_KEY", "TYPESAFE_API_KEY"}
 def service_env(name, values):
     env = {key: value for key, value in os.environ.items() if key not in PROVIDER_KEYS}
     env.update({key: value for key, value in values.items() if value is not None and key not in PROVIDER_KEYS})
-    if name in {"voice", "automation", "research"}:
+    if name in {"task", "voice", "automation", "research"}:
         env["OPENAI_API_KEY"] = values.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+    if name == "task":
+        env["ORBIT_EMBEDDING_MODEL"] = (
+            values.get("ORBIT_EMBEDDING_MODEL")
+            or os.environ.get("ORBIT_EMBEDDING_MODEL", "text-embedding-3-small")
+        )
     if name == "decision":
         env["TYPESAFE_API_KEY"] = values.get("TYPESAFE_API_KEY") or os.environ.get("TYPESAFE_API_KEY", "")
     env["ORBIT_SERVICE"] = name

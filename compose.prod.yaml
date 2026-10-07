@@ -65,6 +65,8 @@ services:
       ORBIT_BROWSER_HOSTS: ${ORBIT_BROWSER_HOSTS:-}
       ORBIT_PLUGINS_CONFIG: ${ORBIT_PLUGINS_CONFIG:-config/orbit.plugins.yaml}
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ORBIT_EMBEDDING_MODEL: ${ORBIT_EMBEDDING_MODEL:-text-embedding-3-small}
     volumes: [artifacts:/data/artifacts]
     tmpfs: [/tmp:size=256m]
     shm_size: 256mb

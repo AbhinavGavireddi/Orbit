@@ -21,7 +21,7 @@ Accepted in chat 2026-10-07. Shipping approach: **incremental PRs** (one slice p
 - uv is the only Python toolchain; Docker Linux host; no host shell; no auto-approve.
 - No second voice runtime (no Pipecat). Redis stays on the talk path.
 - Live BYOK e2e + HTML report must stay green before merge.
-- PR + sync to Mac folder `/Users/abhinavgavireddi/Documents/ChatGPT/personal assistant/orbit`.
+- PR + sync to the local Mac Orbit checkout.
 
 ---
 

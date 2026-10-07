@@ -70,7 +70,7 @@ def test_keyword_still_works_without_embeddings():
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd "/Users/abhinavgavireddi/Documents/ChatGPT/personal assistant/orbit" && .venv/bin/pytest tests/test_memory_semantic.py -v`
+Run: `.venv/bin/pytest tests/test_memory_semantic.py -v` (from repo root)
 Expected: FAIL (`rank_memories_semantic` not defined)
 
 - [ ] **Step 3: Implement embeddings helper + ranking**
